@@ -1,8 +1,8 @@
 - include: create_admin_certs.yml
   when: inventory_hostname in groups['local']
 - include: create_kubernetes_certs.yml
-- include: create_kubelet_conf.yml
 - include: scp_config.yml
+- include: create_kubelet_conf.yml
 - include: start_service.yaml
 - name: kubectl get componentstatuses
   shell: |
