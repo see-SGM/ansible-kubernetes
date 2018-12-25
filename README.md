@@ -1,5 +1,7 @@
 #### ansible-kubernetes
+```
 PS: 这个playbook验证过以下版本(1.11.0/3/5/6)
+```
 
 #### 使用方法
 ```
@@ -15,20 +17,25 @@ ansible-playbook k8s-all.yaml
 ```
 
 #### todo
+```
 1. prometheus
 2. remove
+```
 
 #### see: 
+```
 https://jicki.me/kubernetes/2018/06/29/kubernetes-1.11.0.html
 https://www.ctolib.com/zhangguanzhang-Kubernetes-ansible.html
 https://github.com/erichll/ansible-etcd3
-
+```
 
 #### 注意
+```
 此playbook 仅用来安装kubernetes
 前置的磁盘初始化、后置的ingress域名配置需要自行添加
 本文的Master HA 采用的是云厂商的负载均衡器(LB),如果没有你也可以自建Haporxy 或者 使用Nginx 代理
 如果内网网卡不是eth0的话需要修改 roles/k8s-step6-install-k8sslave/templates/flanneld.j2 改网卡名字
+```
 
 #### 给机器挂载数据盘
 ```
