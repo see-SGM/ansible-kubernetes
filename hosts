@@ -1,18 +1,18 @@
 [local]
-172.22.1.4 name=test-gateway-voicecloud-k8smaster-01
+192.168.1.57 name=test-aisaas-k8smaster-01
 
 [Master:children]
 local
 otherMaster
 
 [otherMaster]
-172.22.1.5 name=test-gateway-voicecloud-k8smaster-02
-172.22.1.6 name=test-gateway-voicecloud-k8smaster-03
+192.168.1.58 name=test-aisaas-k8smaster-02
+192.168.1.59 name=test-aisaas-k8smaster-03
 
 [Node]
-172.22.1.10 name=test-gateway-voicecloud-k8sslave-01
-172.22.1.11 name=test-gateway-voicecloud-k8sslave-02
-172.22.1.12 name=test-gateway-voicecloud-k8sslave-03
+192.168.1.55 name=test-aisaas-k8sslave-01
+192.168.1.54 name=test-aisaas-k8sslave-02
+192.168.1.56 name=test-aisaas-k8sslave-03
 
 [Etcd:children]
 Master

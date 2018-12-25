@@ -1,3 +1,5 @@
+- include: create_dashboard_tls.yml
+  when: inventory_hostname in groups['local']
 - include: dashboard.yml
   when: inventory_hostname in groups['local']
 - include: ingress.yml

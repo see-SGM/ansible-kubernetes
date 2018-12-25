@@ -1,8 +1,12 @@
+- name: install_from_source | download etcd file
+  get_url: url={{ etcd_file_url }} dest=/tmp/{{ etcd_version }}.tgz validate_certs=no
+  when: inventory_hostname in groups['local']
+
 - name: 解压
   unarchive:
-    src: "{{ etcd_tgz }}"
+    src: /tmp/{{ etcd_version }}.tgz
     dest: /tmp/
-  when: inventory_hostname in groups['Etcd']
+  when: inventory_hostname in groups['local']
 
 - name: cp bin to "{{ etcd_bin_path }}"
   copy:
@@ -12,6 +16,6 @@
     group: etcd
     mode: 0750
   with_items:
-    - "/tmp/etcd-v3.2.17-linux-amd64/etcd"
-    - "/tmp/etcd-v3.2.17-linux-amd64/etcdctl"
+    - "/tmp/{{ etcd_version }}/etcd"
+    - "/tmp/{{ etcd_version }}/etcdctl"
   when: inventory_hostname in groups['Etcd']

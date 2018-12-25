@@ -1,0 +1,11 @@
+- name: create kubernetes-dashboard tls
+  shell: |
+    :;openssl req -x509 -nodes -days 3650 -newkey rsa:2048 -keyout ./tls.key -out ./tls.crt -subj "/CN=kubernetes-dashboard"
+  args:
+    chdir: "{{ create_ssl_dir }}"
+
+- name: create secret tls
+  shell: |
+    :;{{ kubelet_bin_path }}/kubectl -n kube-system create secret tls kubernetes-dashboard-ssl-secret --key ./tls.key --cert ./tls.crt
+  args:
+    chdir: "{{ create_ssl_dir }}"

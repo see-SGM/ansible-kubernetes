@@ -1,10 +1,12 @@
+- name: install_from_source | download flannel file
+  get_url: url={{ flannel_file_url }} dest=/tmp/{{ flannel_version }} validate_certs=no
+  when: inventory_hostname in groups['local']
+
 - name: scp {{ flannel_version }} to nodes
   copy:
-    src: "{{ item }}"
+    src: "/tmp/{{ flannel_version }}"
     dest: "/tmp/"
     mode: u+x
-  with_items:
-    - "{{ flannel_version }}"
   when: inventory_hostname in groups['Node']
 
 - name: yum install flannel

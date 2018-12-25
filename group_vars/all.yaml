@@ -5,6 +5,7 @@ docker_version: 18.06.1.ce
 docker_config_dir: /etc/systemd/system/docker.service.d/
 dockerd_option_graph: /var/lib/docker
 
+### KUBERNETES CONFIG ###
 TOKEN: 'ec4340ee22a34a2d2b5aa9c6386afe45'
 TOKEN_ID: 2c9781
 TOKEN_SECRET: 4d8db8233557450b
@@ -12,7 +13,8 @@ TOKEN_SECRET: 4d8db8233557450b
 VIP: '172.22.0.4'
 KUBE_APISERVER: "https://{{ VIP }}:6443"
 
-kubernetes_tgz: /etc/ansible/roles/k8s-step3-scp-bin/files/kubernetes-server-linux-amd64.tar.gz
+kubernetes_version: 1.11.6
+kubernetes_file_url: https://roobo-archive.oss-cn-beijing.aliyuncs.com/op/soft/kubernetes-server-linux-amd64-{{ kubernetes_version }}.tar.gz
 kubelet_bin_path: /usr/local/bin
 kubernetes_path: /etc/kubernetes
 kubernetes_ssl_path: "{{ kubernetes_path }}/ssl"
@@ -21,10 +23,11 @@ admin_csr_json: admin-csr.json
 kubeproxy_csr_json: kube-proxy-csr.json
 
 flannel_version: flannel-0.10.0-1.x86_64.rpm
-flannel_path: /etc/ansible/roles/k8s-step6-install-k8sslave/files/{{ flannel_version }}
+flannel_file_url: https://roobo-archive.oss-cn-beijing.aliyuncs.com/op/soft/{{ flannel_version }}
 
 ### ETCD CONFIG ###
-etcd_tgz: /etc/ansible/roles/k8s-step4-install-etcd/files/etcd-v3.2.17-linux-amd64.tar.gz
+etcd_version: etcd-v3.2.17-linux-amd64
+etcd_file_url: https://roobo-archive.oss-cn-beijing.aliyuncs.com/op/soft/{{ etcd_version }}.tar.gz
 etcd_bin_path: /usr/bin/
 etcd_conf_path: /etc/etcd
 etcd_certs_path: "{{ kubernetes_ssl_path }}"
@@ -47,7 +50,9 @@ kubernetes_log: /var/log/kubernetes
 create_ssl_dir: /opt/ssl
 cfssl_path: /usr/local/bin
 cfssl_file: cfssl_linux-amd64
+cfssl_file_url: https://roobo-archive.oss-cn-beijing.aliyuncs.com/op/soft/{{ cfssl_file }}
 cfssljson_file: cfssljson_linux-amd64
+cfssljson_file_url: https://roobo-archive.oss-cn-beijing.aliyuncs.com/op/soft/{{ cfssljson_file }}
 
 ca_config_json: ca-config.json
 ca: ca

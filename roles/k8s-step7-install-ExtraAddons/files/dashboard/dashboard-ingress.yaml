@@ -1,12 +1,13 @@
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-  name: dashboard-ingress
+  name: kubernetes-dashboard-ingress
+  annotations:
+    ingress.kubernetes.io/ssl-passthrough: "true"
+    nginx.ingress.kubernetes.io/secure-backends: "true"
 spec:
   tls:
-  - hosts:
-    - preview-k8s.roobo.com
-    secretName: roobo.com-https-secret
+  - secretName: kubernetes-dashboard-ssl-secret
   rules:
   - host:  preview-k8s.roobo.com
     http:

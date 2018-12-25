@@ -1,6 +1,10 @@
+- name: install_from_source | download kubernetes file
+  get_url: url={{ kubernetes_file_url }} dest=/tmp/kubernetes-server-linux-amd64.tar.gz validate_certs=no
+  when: inventory_hostname in groups['local']
+
 - name: 解压
   unarchive:
-    src: "{{ kubernetes_tgz }}"
+    src: /tmp/kubernetes-server-linux-amd64.tar.gz
     dest: /tmp/
   when: inventory_hostname in groups['local']
 

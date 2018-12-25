@@ -4,11 +4,19 @@
     state: directory
     directory_mode: 755
 
+- name: install_from_source | download cfssl file
+  get_url: url={{ cfssl_file_url }} dest={{ cfssl_path }} validate_certs=no
+  when: inventory_hostname in groups['local']
+
+- name: install_from_source | download cfssljson_file file
+  get_url: url={{ cfssljson_file_url }} dest={{ cfssl_path }} validate_certs=no
+  when: inventory_hostname in groups['local']
+
 - name: 设置cfssl(并改名)
   copy:
-    src: files/{{ item.src }}
+    src: /{{ item.src }}
     dest: "{{ cfssl_path }}/{{ item.dest }}"
     mode: u+x
   with_items:
-    - { src: "{{ cfssljson_file }}", dest: 'cfssljson' }
-    - { src: "{{ cfssl_file }}", dest: 'cfssl' }
+    - { src: "{{ cfssl_path}}/{{ cfssljson_file }}", dest: 'cfssljson' }
+    - { src: "{{ cfssl_path}}/{{ cfssl_file }}", dest: 'cfssl' }
