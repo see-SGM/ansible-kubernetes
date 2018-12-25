@@ -1,0 +1,4 @@
+- include: bin.yml
+
+- include: cfssl.yml
+  when: inventory_hostname in groups['local']

@@ -1,0 +1,27 @@
+- name: create local {{ create_ssl_dir }}
+  file:
+    path: "{{ create_ssl_dir }}"
+    state: directory
+    directory_mode: 755
+  when: inventory_hostname in groups['local']
+
+- name: cp kubernetes-csr.json to {{ create_ssl_dir }}
+  copy:
+    src: files/{{ item }}
+    dest: "{{ create_ssl_dir }}"
+  with_items:
+    - "{{ kubernetes_csr_json }}"
+  when: inventory_hostname in groups['local']
+
+- name: create kubernetes certs
+  shell: |
+    :;{{ cfssl_path }}/cfssl gencert \
+       -ca={{ create_ssl_dir }}/ca.pem \
+       -ca-key={{ create_ssl_dir }}/ca-key.pem \
+       -config={{ create_ssl_dir }}/ca-config.json \
+       -hostname={{ VIP }},127.0.0.1,10.254.0.1,kubernetes,kubernetes.default,kubernetes.default.svc,kubernetes.default.svc.cluster,kubernetes.default.svc.cluster.local,{% for host in groups['Master'] %}{{ hostvars[host].ansible_default_ipv4.address }}{% if not loop.last %},{% endif %}{% endfor %} \
+       -profile=kubernetes \
+       {{ kubernetes_csr_json }} | {{ cfssl_path }}/cfssljson -bare kubernetes;
+  args:
+    chdir: "{{ create_ssl_dir }}"
+  when: inventory_hostname in groups['local']

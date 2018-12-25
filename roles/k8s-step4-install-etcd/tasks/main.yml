@@ -1,0 +1,32 @@
+- include: create_ca_ssl.yml
+  when: inventory_hostname in groups['local']
+- include: create_etcd_ssl.yml
+  when: inventory_hostname in groups['local']
+- include: scp_ssl.yml
+- include: create_etcd_user.yml
+  when: inventory_hostname in groups['Etcd']
+- include: scp_etcd_bin.yml
+  when: inventory_hostname in groups['Etcd']
+- include: gen-etcd-systemd.yml
+  when: inventory_hostname in groups['Etcd']
+- include: etcd-restart.yml
+  when: inventory_hostname in groups['Etcd']
+
+- name: etcdctl  cluster-health
+  shell: |
+    :;{{ etcd_bin_path }}/etcdctl --endpoints={{ etcd_advertise_client_urls }} \
+        --cert-file={{ kubernetes_ssl_path }}/etcd.pem \
+        --ca-file={{ kubernetes_ssl_path }}/ca.pem \
+        --key-file={{ kubernetes_ssl_path }}/etcd-key.pem \
+        cluster-health;
+      {{ etcd_bin_path }}/etcdctl --endpoints={{ etcd_advertise_client_urls }} \
+        --cert-file={{ kubernetes_ssl_path }}/etcd.pem \
+        --ca-file={{ kubernetes_ssl_path }}/ca.pem \
+        --key-file={{ kubernetes_ssl_path }}/etcd-key.pem \
+        member list;
+  register: result
+  when: inventory_hostname in groups['Etcd']
+- name: Show debug info
+  debug: var=result.stdout_lines verbosity=0
+
+#- include: remove_install.yml

@@ -1,0 +1,33 @@
+- hosts: all
+  gather_facts: no
+  roles:
+  - { role: k8s-step1-init-system }
+
+- hosts: all
+  gather_facts: no
+  roles:
+  - { role: k8s-step2-install-docker }
+
+- hosts: all
+  gather_facts: no
+  roles:
+  - { role: k8s-step3-scp-bin }
+
+- hosts: all
+  roles:
+  - { role: k8s-step4-install-etcd }
+
+- hosts: Master
+  gather_facts: yes
+  roles:
+  - { role: k8s-step5-install-k8smaster }
+
+- hosts: all
+  gather_facts: yes
+  roles:
+  - { role: k8s-step6-install-k8sslave }
+
+- hosts: local
+  gather_facts: no
+  roles:
+  - { role: k8s-step7-install-ExtraAddons }

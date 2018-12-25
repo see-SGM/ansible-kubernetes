@@ -1,0 +1,29 @@
+- name: create kubernetes path
+  file:
+    path: "{{ item }}"
+    state: directory
+    #directory_mode: 755
+  with_items:
+    - "{{ kubernetes_path }}"
+    - "{{ kubernetes_ssl_path }}"
+
+- name: scp ca.pem ca-key.pem ca.csr to "{{ kubernetes_ssl_path }}"
+  copy:
+    src: "{{ item }}"
+    dest: "{{ kubernetes_ssl_path }}"
+    #directory_mode: 755 
+    #mode: u+x
+  with_items:
+    - "{{ create_ssl_dir }}/ca-key.pem"
+    - "{{ create_ssl_dir }}/ca.pem"
+    - "{{ create_ssl_dir }}/ca.csr"
+  when: inventory_hostname in groups['Master']
+
+- name: scp etcd*.pem to "{{ kubernetes_ssl_path }}"
+  copy:
+    src: "{{ item }}"
+    dest: "{{ kubernetes_ssl_path }}"
+  with_items:
+    - "{{ create_ssl_dir }}/etcd-key.pem"
+    - "{{ create_ssl_dir }}/etcd.pem"
+  when: inventory_hostname in groups['all']

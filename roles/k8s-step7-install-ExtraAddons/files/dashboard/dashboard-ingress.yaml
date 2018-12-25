@@ -1,0 +1,16 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: dashboard-ingress
+spec:
+  tls:
+  - hosts:
+    - preview-k8s.roobo.com
+    secretName: roobo.com-https-secret
+  rules:
+  - host:  preview-k8s.roobo.com
+    http:
+      paths:
+      - backend:
+          serviceName: kubernetes-dashboard
+          servicePort: 443

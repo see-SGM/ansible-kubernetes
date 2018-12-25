@@ -1,0 +1,16 @@
+- name: unzip kubernetes
+  unarchive:
+    src: "{{ kubernetes_tgz }}"
+    dest: /tmp/
+  when: inventory_hostname in groups['local']
+
+- name: scp bin to slave
+  copy:
+    src: "{{ item }}"
+    dest: "{{ kubelet_bin_path }}"
+    directory_mode: 755
+    mode: u+x
+  with_items:
+    - "/tmp/kubernetes/server/bin/kube-proxy"
+    - "/tmp/kubernetes/server/bin/kubectl"
+    - "/tmp/kubernetes/server/bin/kubelet"

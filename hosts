@@ -1,0 +1,32 @@
+[local]
+172.22.1.4 name=test-gateway-voicecloud-k8smaster-01
+
+[Master:children]
+local
+otherMaster
+
+[otherMaster]
+172.22.1.5 name=test-gateway-voicecloud-k8smaster-02
+172.22.1.6 name=test-gateway-voicecloud-k8smaster-03
+
+[Node]
+172.22.1.10 name=test-gateway-voicecloud-k8sslave-01
+172.22.1.11 name=test-gateway-voicecloud-k8sslave-02
+172.22.1.12 name=test-gateway-voicecloud-k8sslave-03
+
+[Etcd:children]
+Master
+
+[all:children]
+Master
+Node
+
+#[newNode]
+#172.22.1.13 name=test-gateway-voicecloud-k8sslave-05
+
+#如果各台密码和端口不同请按照下面格式填写好并注释掉group_vars/all.yml里的ansible_ssh_pass的那一行
+#[Node]
+#172.22.1.13 ansible_ssh_pass=password ansible_ssh_port=666
+#172.22.1.14 ansible_ssh_pass=password233 ansible_ssh_port=68
+
+#如果使用公有云负载均衡LB，请将LB VIP 更新到 group_vars/all.yaml 里"VIP"变量,不然slave调用api时会报错证书错误

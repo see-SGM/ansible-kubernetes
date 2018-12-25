@@ -1,0 +1,4 @@
+- include: dashboard.yml
+  when: inventory_hostname in groups['local']
+- include: ingress.yml
+  when: inventory_hostname in groups['local']

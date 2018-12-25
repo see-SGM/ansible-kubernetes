@@ -1,0 +1,20 @@
+[Unit]
+Description=Kubernetes Kubelet
+Documentation=https://github.com/GoogleCloudPlatform/kubernetes
+After=docker.service
+Requires=docker.service
+
+[Service]
+WorkingDirectory={{ kubelet_data_path }}
+ExecStart={{ kubelet_bin_path }}/kubelet \
+  --hostname-override={{ name }} \
+  --pod-infra-container-image=registry.cn-beijing.aliyuncs.com/roobo/pause-amd64:3.1 \
+  --bootstrap-kubeconfig={{ kubernetes_path }}/bootstrap-kubelet.conf \
+  --kubeconfig={{ kubernetes_path }}/kubelet.kubeconfig \
+  --config={{ kubernetes_path }}/kubelet.config.json \
+  --cert-dir={{ kubernetes_ssl_path }} \
+  --logtostderr=true \
+  --v=2
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,5 @@
+---
+- hosts: local
+  gather_facts: no
+  roles:
+  - { role: k8s-step7-install-ExtraAddons }

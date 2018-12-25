@@ -1,0 +1,20 @@
+- name: start flanneld
+  systemd:
+    name: flanneld
+    daemon_reload: yes
+    state: started
+    enabled: yes
+
+- name: start kubelet
+  systemd:
+    name: kubelet
+    daemon_reload: yes
+    state: started
+    enabled: yes
+
+- name: start kube-proxy
+  systemd:
+    name: kube-proxy
+    daemon_reload: yes
+    state: started
+    enabled: yes

@@ -1,0 +1,26 @@
+- name: create local {{ create_ssl_dir }}
+  file:
+    path: "{{ create_ssl_dir }}"
+    state: directory
+    directory_mode: 755
+  when: inventory_hostname in groups['local']
+
+- name: cp {{ kubeproxy_csr_json }} to {{ create_ssl_dir }}
+  copy:
+    src: files/{{ item }}
+    dest: "{{ create_ssl_dir }}"
+  with_items:
+    - "{{ kubeproxy_csr_json }}"
+  when: inventory_hostname in groups['local']
+
+- name: create kube proxy certs
+  shell: |
+    :;{{ cfssl_path }}/cfssl gencert \
+       -ca={{ create_ssl_dir }}/ca.pem \
+       -ca-key={{ create_ssl_dir }}/ca-key.pem \
+       -config={{ create_ssl_dir }}/ca-config.json \
+       -profile=kubernetes \
+       {{ kubeproxy_csr_json }} | {{ cfssl_path }}/cfssljson -bare kube-proxy;
+  args:
+    chdir: "{{ create_ssl_dir }}"
+  when: inventory_hostname in groups['local']

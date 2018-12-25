@@ -1,0 +1,18 @@
+{% macro initial_cluster() -%}
+{% for host in groups['Etcd'] -%}
+  https://{{ hostvars[host]['etcd_machine_address'] }}:{{ etcd_client_port }}
+  {%- if not loop.last -%},{%- endif -%}
+{%- endfor -%}
+{% endmacro -%}
+
+# Flanneld configuration options
+
+# etcd 地址
+
+FLANNEL_ETCD_ENDPOINTS="{{ initial_cluster() }}"
+
+# 配置为上面的路径 flannel/network
+FLANNEL_ETCD_PREFIX="/flannel/network"
+
+# 其他的配置，可查看 flanneld --help,这里添加了 etcd ssl 认证
+FLANNEL_OPTIONS="-ip-masq=true -etcd-cafile={{ kubernetes_ssl_path }}/ca.pem -etcd-certfile={{ kubernetes_ssl_path }}/etcd.pem -etcd-keyfile={{ kubernetes_ssl_path }}/etcd-key.pem -iface=eth0"

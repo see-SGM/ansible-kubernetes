@@ -1,0 +1,16 @@
+#- name: create ingress temp dir
+#  file:
+#    path: "{{ item }}"
+#    state: directory
+#  with_items:
+#    - "{{ kubernetes_path }}/temp/ingress"
+
+- name: copy ingress yaml to temp dir
+  copy:
+    src: files/ingress/
+    dest: "{{ kubernetes_path }}/temp/ingress/"
+
+- name: deploy ingress
+  shell: |
+    :;{{ kubelet_bin_path }}/kubectl apply -f {{ kubernetes_path }}/temp/ingress/namespace.yaml;
+    {{ kubelet_bin_path }}/kubectl apply -f {{ kubernetes_path }}/temp/ingress/;

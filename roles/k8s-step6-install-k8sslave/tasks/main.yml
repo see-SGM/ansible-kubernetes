@@ -1,0 +1,8 @@
+- include: proxy_certs.yml
+- include: TLS.yml
+  when: inventory_hostname in groups['local']
+- include: flannel.yml
+- include: Node.yml
+  when: inventory_hostname in groups['Node']
+- include: dns.yml
+  when: inventory_hostname in groups['local']

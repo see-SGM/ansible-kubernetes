@@ -1,0 +1,63 @@
+- name: create kubernetes dir
+  file:
+    path: "{{ item }}"
+    state: directory
+  with_items:
+    - "{{ kubernetes_path }}"
+    - "{{ kubernetes_ssl_path }}"
+    #- '/etc/systemd/system/kubelet.service.d'
+    - "{{ kubelet_data_path }}"
+    - "{{ kubeproxy_data_path }}"
+    - "{{ kubernetes_log }}"
+
+- name: scp ca.pem to node
+  copy:
+    src: "{{ item }}"
+    dest: "{{ item }}"
+    directory_mode: 755
+  with_items:
+    - "{{ kubernetes_ssl_path }}/{{ ca }}.pem"
+    - "{{ kubernetes_path }}/bootstrap-kubelet.conf"
+    - "{{ kubernetes_ssl_path }}/{{ ca }}.pem"
+
+- name: scp etcd.pem to "{{ kubernetes_ssl_path }}"
+  copy:
+    src: "{{ item }}"
+    dest: "{{ kubernetes_ssl_path }}"
+  with_items:
+    - "{{ create_ssl_dir }}/etcd-key.pem"
+    - "{{ create_ssl_dir }}/etcd.pem"
+
+- name: yum install ipvs
+  yum: name={{item}} state=present
+  with_items:
+     - ipset
+     - ipvsadm
+     - conntrack-tools.x86_64
+
+- name: 分发kube-proxy凭证到Node上
+  copy:
+    src: "{{ item }}"
+    dest: "{{ kubernetes_ssl_path }}"
+    directory_mode: 755
+  with_items:
+    - "{{ create_ssl_dir }}/kube-proxy.csr"
+    - "{{ create_ssl_dir }}/kube-proxy-key.pem"
+    - "{{ create_ssl_dir }}/kube-proxy.pem"
+
+- name: 分发kube-proxy config 到Node上
+  copy:
+    src: "{{ item }}"
+    dest: "{{ kubernetes_path }}"
+    directory_mode: 755
+  with_items:
+    - "{{ kubernetes_path }}/kube-proxy.kubeconfig"
+
+- name: 分发kubelet systemd文件模板到node
+  template: src={{ item.src }} dest={{ item.dest }}/{{ item.src.split('.')[:-1]|join('.') }}
+  with_items:
+    - { src: 'kubelet.service.j2', dest: '/etc/systemd/system/' }
+    - { src: 'kubelet.config.json.j2', dest: '{{ kubernetes_path }}' }
+    - { src: 'kube-proxy.service.j2', dest: '/etc/systemd/system/' }
+    - { src: 'kube-proxy.config.yaml.j2', dest: '{{ kubernetes_path }}' }
+- include: start_service.yml

@@ -1,0 +1,31 @@
+- name: scp {{ flannel_version }} to nodes
+  copy:
+    src: "{{ item }}"
+    dest: "/tmp/"
+    mode: u+x
+  with_items:
+    - "{{ flannel_version }}"
+  when: inventory_hostname in groups['Node']
+
+- name: yum install flannel
+  yum: name={{item}}
+  with_items:
+     - /tmp/{{ flannel_version }}
+  when: inventory_hostname in groups['Node']
+
+- name: 配置 flannel 网段
+  shell: |
+    :;{{ etcd_bin_path }}/etcdctl --endpoints=https://{{ etcd_machine_address }}:2379 \
+      --cert-file={{ kubernetes_ssl_path }}/etcd.pem \
+      --ca-file={{ kubernetes_ssl_path }}/ca.pem \
+      --key-file={{ kubernetes_ssl_path }}/etcd-key.pem \
+      set /flannel/network/config \
+      '{"Network":"10.254.64.0/18","SubnetLen":24,"Backend":{"Type":"vxlan"}}';
+  when: inventory_hostname in groups['local']
+
+- name: 分发flanneld配置文件模板到node
+  template: src={{ item.src }} dest={{ item.dest }}/{{ item.src.split('.')[:-1]|join('.') }}
+  with_items:
+    - { src: 'flanneld.j2', dest: '/etc/sysconfig/' }
+    - { src: 'flannel.conf.j2', dest: '/etc/systemd/system/docker.service.d/' }
+  when: inventory_hostname in groups['Node']

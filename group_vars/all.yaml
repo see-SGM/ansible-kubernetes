@@ -1,0 +1,57 @@
+ansible_ssh_port: 22
+ansible_ssh_pass: Juan365Roobo2016
+
+docker_version: 18.06.1.ce
+docker_config_dir: /etc/systemd/system/docker.service.d/
+dockerd_option_graph: /var/lib/docker
+
+TOKEN: 'ec4340ee22a34a2d2b5aa9c6386afe45'
+TOKEN_ID: 2c9781
+TOKEN_SECRET: 4d8db8233557450b
+
+VIP: '172.22.0.4'
+KUBE_APISERVER: "https://{{ VIP }}:6443"
+
+kubernetes_tgz: /etc/ansible/roles/k8s-step3-scp-bin/files/kubernetes-server-linux-amd64.tar.gz
+kubelet_bin_path: /usr/local/bin
+kubernetes_path: /etc/kubernetes
+kubernetes_ssl_path: "{{ kubernetes_path }}/ssl"
+kubernetes_csr_json: kubernetes-csr.json
+admin_csr_json: admin-csr.json
+kubeproxy_csr_json: kube-proxy-csr.json
+
+flannel_version: flannel-0.10.0-1.x86_64.rpm
+flannel_path: /etc/ansible/roles/k8s-step6-install-k8sslave/files/{{ flannel_version }}
+
+### ETCD CONFIG ###
+etcd_tgz: /etc/ansible/roles/k8s-step4-install-etcd/files/etcd-v3.2.17-linux-amd64.tar.gz
+etcd_bin_path: /usr/bin/
+etcd_conf_path: /etc/etcd
+etcd_certs_path: "{{ kubernetes_ssl_path }}"
+etcd_data_path: /var/lib/etcd
+etcd_csr_json: etcd-csr.json
+etcd_client_port: 2379
+etcd_peer_port: 2380
+etcd_initial_cluster_state: new
+etcd_initial_cluster_token: etcd-k8s-cluster
+etcd_machine_address: "{{ ansible_default_ipv4.address }}"
+etcd_initial_advertise_peer_urls: "https://{{ etcd_machine_address }}:{{ etcd_peer_port }}"
+etcd_listen_peer_urls: "https://{{ etcd_machine_address }}:{{ etcd_peer_port }}"
+etcd_listen_client_urls: "https://{{ etcd_machine_address }}:2379,https://127.0.0.1:2379"
+etcd_advertise_client_urls: "https://{{ etcd_machine_address }}:{{ etcd_client_port }}"
+
+kubelet_data_path: /var/lib/kubelet
+kubeproxy_data_path: /var/lib/kube-proxy
+kubernetes_log: /var/log/kubernetes
+
+create_ssl_dir: /opt/ssl
+cfssl_path: /usr/local/bin
+cfssl_file: cfssl_linux-amd64
+cfssljson_file: cfssljson_linux-amd64
+
+ca_config_json: ca-config.json
+ca: ca
+ca_csr_json: ca-csr.json
+
+audit_policy_yml: audit-policy.yml
+encryption_yml: encryption.yml

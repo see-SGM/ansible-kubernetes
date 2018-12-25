@@ -1,0 +1,33 @@
+- name: 解压
+  unarchive:
+    src: "{{ kubernetes_tgz }}"
+    dest: /tmp/
+  when: inventory_hostname in groups['local']
+
+- name: scp bin to master
+  copy:
+    src: "{{ item }}"
+    dest: "{{ kubelet_bin_path }}"
+    directory_mode: 755 
+    mode: u+x
+  with_items:
+    - "/tmp/kubernetes/server/bin/kube-apiserver"
+    - "/tmp/kubernetes/server/bin/kube-controller-manager"
+    - "/tmp/kubernetes/server/bin/kube-scheduler"
+    - "/tmp/kubernetes/server/bin/kube-proxy"
+    - "/tmp/kubernetes/server/bin/kubectl"
+    - "/tmp/kubernetes/server/bin/kubelet"
+    - "/tmp/kubernetes/server/bin/kubeadm"
+  when: inventory_hostname in groups['Master']
+
+- name: scp bin to slave
+  copy:
+    src: "{{ item }}"
+    dest: "{{ kubelet_bin_path }}"
+    directory_mode: 755
+    mode: u+x
+  with_items:
+    - "/tmp/kubernetes/server/bin/kube-proxy"
+    - "/tmp/kubernetes/server/bin/kubectl"
+    - "/tmp/kubernetes/server/bin/kubelet"
+  when: inventory_hostname in groups['Node']

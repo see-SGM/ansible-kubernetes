@@ -1,0 +1,56 @@
+{% macro etcd_initial_cluster() -%}
+{% for host in groups['Etcd'] -%}
+  https://{{ hostvars[host]['etcd_machine_address'] }}:{{ etcd_client_port }}
+  {%- if not loop.last -%},{%- endif -%}
+{%- endfor -%}
+{% endmacro -%}
+
+[Unit]
+Description=Kubernetes API Server
+Documentation=https://github.com/GoogleCloudPlatform/kubernetes
+After=network.target
+
+[Service]
+User=root
+ExecStart={{ kubelet_bin_path }}/kube-apiserver \
+  --admission-control=NamespaceLifecycle,LimitRanger,ServiceAccount,DefaultStorageClass,ResourceQuota,NodeRestriction \
+  --anonymous-auth=false \
+  --experimental-encryption-provider-config={{ kubernetes_path }}/encryption.yaml \
+  --advertise-address={{ ansible_default_ipv4.address }} \
+  --allow-privileged=true \
+  --apiserver-count=3 \
+  --audit-policy-file={{ kubernetes_path }}/audit-policy.yaml \
+  --audit-log-maxage=30 \
+  --audit-log-maxbackup=3 \
+  --audit-log-maxsize=100 \
+  --audit-log-path={{ kubernetes_log }}/audit.log \
+  --authorization-mode=Node,RBAC \
+  --bind-address=0.0.0.0 \
+  --secure-port=6443 \
+  --client-ca-file={{ kubernetes_ssl_path }}/ca.pem \
+  --kubelet-client-certificate={{ kubernetes_ssl_path }}/kubernetes.pem \
+  --kubelet-client-key={{ kubernetes_ssl_path }}/kubernetes-key.pem \
+  --enable-swagger-ui=true \
+  --etcd-cafile={{ kubernetes_ssl_path }}/ca.pem \
+  --etcd-certfile={{ kubernetes_ssl_path }}/etcd.pem \
+  --etcd-keyfile={{ kubernetes_ssl_path }}/etcd-key.pem \
+  --etcd-servers={{ etcd_initial_cluster() }} \
+  --event-ttl=1h \
+  --kubelet-https=true \
+  --insecure-bind-address=127.0.0.1 \
+  --insecure-port=8080 \
+  --service-account-key-file={{ kubernetes_ssl_path }}/ca-key.pem \
+  --service-cluster-ip-range=10.254.0.0/18 \
+  --service-node-port-range=30000-32000 \
+  --tls-cert-file={{ kubernetes_ssl_path }}/kubernetes.pem \
+  --tls-private-key-file={{ kubernetes_ssl_path }}/kubernetes-key.pem \
+  --enable-bootstrap-token-auth \
+  --log-dir={{ kubernetes_log }}
+  --v=1
+Restart=on-failure
+RestartSec=5
+Type=notify
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target

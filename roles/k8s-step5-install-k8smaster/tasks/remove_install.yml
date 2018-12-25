@@ -1,0 +1,30 @@
+- include: stop_service.yaml
+  when: inventory_hostname in groups['Master']
+  
+- name: remove kube-apiserver.service
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - "{{ etcd_conf_path }}"
+    - "{{ etcd_bin_path }}/etcd"
+    - "{{ etcd_bin_path }}/etcd_ctl"
+    - "{{ etcd_certs_path }}/etcd.pem"
+    - "{{ etcd_certs_path }}/etcd-key.pem"
+    - "{{ etcd_data_path }}"
+    - /etc/systemd/system/etcd.service
+  when: inventory_hostname in groups['Etcd']
+
+- name: drop system etcd group
+  user:
+    name: etcd
+    state: absent
+    remove: yes
+  when: inventory_hostname in groups['Etcd']
+
+- name: drop system etcd user
+  user:
+    name: etcd
+    state: absent
+    remove: yes
+  when: inventory_hostname in groups['Etcd']

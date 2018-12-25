@@ -1,0 +1,17 @@
+- name: 生成kubelet.conf的 kubeconfig
+  shell: |
+    :;{{ kubelet_bin_path }}/kubectl config set-cluster kubernetes \
+      --certificate-authority={{ kubernetes_ssl_path }}/ca.pem \
+      --embed-certs=true \
+      --server="https://127.0.0.1:6443" ;
+    {{ kubelet_bin_path }}/kubectl config set-credentials admin \
+      --client-certificate={{ kubernetes_ssl_path }}/admin.pem \
+      --client-key={{ kubernetes_ssl_path }}/admin-key.pem \
+      --embed-certs=true ;
+    {{ kubelet_bin_path }}/kubectl config set-context kubernetes \
+      --cluster=kubernetes \
+      --user=admin ;
+    {{ kubelet_bin_path }}/kubectl config use-context kubernetes ;
+  args:
+    chdir: "{{ create_ssl_dir }}"
+  when: inventory_hostname in groups['local']

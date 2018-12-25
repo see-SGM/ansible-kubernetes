@@ -1,0 +1,18 @@
+- name: scp {{ flannel_version }} to nodes
+  copy:
+    src: "{{ item }}"
+    dest: "/tmp/"
+    mode: u+x
+  with_items:
+    - "{{ flannel_version }}"
+
+- name: yum install flannel
+  yum: name={{item}}
+  with_items:
+     - /tmp/{{ flannel_version }}
+
+- name: scp flanneld conf to node
+  template: src={{ item.src }} dest={{ item.dest }}/{{ item.src.split('.')[:-1]|join('.') }}
+  with_items:
+    - { src: 'flanneld.j2', dest: '/etc/sysconfig/' }
+    - { src: 'flannel.conf.j2', dest: '/etc/systemd/system/docker.service.d/' }

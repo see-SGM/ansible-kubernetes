@@ -1,0 +1,35 @@
+- name: create kubernetes path
+  file:
+    path: "{{ item }}"
+    state: directory
+  with_items:
+    - "{{ kubernetes_path }}"
+    - "{{ kubernetes_ssl_path }}"
+
+- name: scp admin.pem,admin-key.pem to "{{ kubernetes_ssl_path }}"
+  copy:
+    src: "{{ item }}"
+    dest: "{{ kubernetes_ssl_path }}"
+  with_items:
+    - "{{ create_ssl_dir }}/admin-key.pem"
+    - "{{ create_ssl_dir }}/admin.pem"
+  when: inventory_hostname in groups['Master']
+
+- name: scp kubernetes.pem,kubernetes-key.pem to "{{ kubernetes_ssl_path }}"
+  copy:
+    src: "{{ item }}"
+    dest: "{{ kubernetes_ssl_path }}"
+  with_items:
+    - "{{ create_ssl_dir }}/kubernetes-key.pem"
+    - "{{ create_ssl_dir }}/kubernetes.pem"
+  when: inventory_hostname in groups['Master']
+
+- name: 分发资源文件模板到每台Master
+  template: src={{ item.src }} dest={{ item.dest }}/{{ item.src.split('.')[:-1]|join('.') }}
+  with_items:
+    - { src: 'encryption.yaml.j2', dest: "{{ kubernetes_path }}" }
+    - { src: 'audit-policy.yaml.j2', dest: "{{ kubernetes_path }}" }
+    - { src: 'kube-apiserver.service.j2', dest: '/etc/systemd/system/' }
+    - { src: 'kube-controller-manager.service.j2', dest: '/etc/systemd/system/' }
+    - { src: 'kube-scheduler.service.j2', dest: '/etc/systemd/system/' }
+  when: inventory_hostname in groups['Master']

@@ -1,0 +1,72 @@
+- file:
+    path: "{{ kubernetes_path }}/temp"
+    state: directory
+
+- copy:
+    src: files/{{ item }}
+    dest: "{{ kubernetes_path }}/temp"
+  with_items:
+    - 'apiserver-to-kubelet-rbac.yml.conf'
+    - 'kubelet-bootstrap-rbac.yml.conf'
+
+- name: 设置Master节点
+  shell: |
+    :;{{ kubelet_bin_path }}/kubectl apply -f temp/apiserver-to-kubelet-rbac.yml.conf;sleep 3;
+    {{ kubelet_bin_path }}/kubectl taint nodes node-role.kubernetes.io/master="":NoSchedule --all;
+  args:
+    chdir: "{{ kubernetes_path }}"
+
+- name:  生成bootstrap-kubelet.conf的 Kubernetes config文件
+  shell: |
+    :;{{ kubelet_bin_path }}/kubectl config set-cluster kubernetes \
+      --certificate-authority={{ kubernetes_ssl_path }}/ca.pem \
+      --embed-certs=true \
+      --server={{ KUBE_APISERVER }} \
+      --kubeconfig={{ kubernetes_path }}/bootstrap-kubelet.conf;sleep 1;
+    {{ kubelet_bin_path }}/kubectl config set-credentials tls-bootstrap-token-user \
+      --token={{ TOKEN_ID }}.{{ TOKEN_SECRET }} \
+      --kubeconfig={{ kubernetes_path }}/bootstrap-kubelet.conf;sleep 1;
+    {{ kubelet_bin_path }}/kubectl config set-context tls-bootstrap-token-user@kubernetes \
+      --cluster=kubernetes \
+      --user=tls-bootstrap-token-user \
+      --kubeconfig={{ kubernetes_path }}/bootstrap-kubelet.conf;sleep 1;
+    {{ kubelet_bin_path }}/kubectl config use-context tls-bootstrap-token-user@kubernetes \
+      --kubeconfig={{ kubernetes_path }}/bootstrap-kubelet.conf;sleep 1;
+  args:
+    chdir: "{{ kubernetes_path }}"
+
+- name:  生成kube-proxy的 kubeconfig 文件
+  shell: |
+    :;{{ kubelet_bin_path }}/kubectl config set-cluster kubernetes \
+      --certificate-authority={{ create_ssl_dir }}/ca.pem \
+      --embed-certs=true \
+      --server={{ KUBE_APISERVER }} \
+      --kubeconfig={{ kubernetes_path }}/kube-proxy.kubeconfig;sleep 1;
+
+    {{ kubelet_bin_path }}/kubectl config set-credentials kube-proxy \
+      --client-certificate={{ create_ssl_dir }}/kube-proxy.pem \
+      --client-key={{ create_ssl_dir }}/kube-proxy-key.pem \
+      --embed-certs=true \
+      --kubeconfig={{ kubernetes_path }}/kube-proxy.kubeconfig;sleep 1;
+
+    {{ kubelet_bin_path }}/kubectl config set-context default \
+      --cluster=kubernetes \
+      --user=kube-proxy \
+      --kubeconfig={{ kubernetes_path }}/kube-proxy.kubeconfig;sleep 1;
+
+    {{ kubelet_bin_path }}/kubectl config use-context default \
+      --kubeconfig={{ kubernetes_path }}/kube-proxy.kubeconfig;sleep 1;
+  args:
+    chdir: "{{ kubernetes_path }}"
+
+- name: 渲染bootstrap secret文件模板
+  template: src={{ item.src }} dest={{ item.dest }}/{{ item.src.split('.')[:-1]|join('.') }}
+  with_items:
+    - { src: 'bootstrap-token-Secret.yml.conf.j2', dest: "{{ kubernetes_path }}/temp" }
+
+- name: 建立TLS bootstrap secret来提供自动签证使用并建立TLS Bootstrap Autoapprove RBAC
+  shell: |
+    :;{{ kubelet_bin_path }}/kubectl apply -f temp/bootstrap-token-Secret.yml.conf;sleep 3;
+    {{ kubelet_bin_path }}/kubectl apply -f temp/kubelet-bootstrap-rbac.yml.conf;
+  args:
+    chdir: "{{ kubernetes_path }}"

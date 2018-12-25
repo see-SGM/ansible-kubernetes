@@ -1,0 +1,8 @@
+---
+- hosts: all
+  gather_facts: yes
+  roles:
+    - k8s-step1-init-system
+    - k8s-step2-install-docker
+    - k8s-step8-addNode
+    

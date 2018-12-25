@@ -1,0 +1,24 @@
+#- name: create dashboard temp dir
+#  file:
+#    path: "{{ item }}"
+#    state: directory
+#  with_items:
+#    - "{{ kubernetes_path }}/temp/dashboard"
+
+- name: copy dashboard yaml to temp dir
+  copy:
+    src: files/dashboard/
+    dest: "{{ kubernetes_path }}/temp/dashboard/"
+
+- name: deploy kubernetes-dashboard
+  shell: |
+    :;{{ kubelet_bin_path }}/kubectl apply -f {{ kubernetes_path }}/temp/dashboard/kubernetes-dashboard.yaml;
+    {{ kubelet_bin_path }}/kubectl apply -f {{ kubernetes_path }}/temp/dashboard/dashboard-admin-rbac.yaml;
+
+- name: get kubernetes dashboard admin token
+  shell: |
+    :;{{ kubelet_bin_path }}/kubectl -n kube-system get secret |grep admin-token|awk '{print $1}'| xargs {{ kubelet_bin_path }}/kubectl -n kube-system describe secret |grep "token:"
+  register: dashboardadmintoken
+
+- name: Show token info 
+  debug: var=dashboardadmintoken.stdout_lines verbosity=0

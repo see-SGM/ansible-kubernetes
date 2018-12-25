@@ -1,0 +1,17 @@
+- name: 解压
+  unarchive:
+    src: "{{ etcd_tgz }}"
+    dest: /tmp/
+  when: inventory_hostname in groups['Etcd']
+
+- name: cp bin to "{{ etcd_bin_path }}"
+  copy:
+    src: "{{ item }}"
+    dest: "{{ etcd_bin_path }}"
+    owner: etcd
+    group: etcd
+    mode: 0750
+  with_items:
+    - "/tmp/etcd-v3.2.17-linux-amd64/etcd"
+    - "/tmp/etcd-v3.2.17-linux-amd64/etcdctl"
+  when: inventory_hostname in groups['Etcd']

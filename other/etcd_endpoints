@@ -1,0 +1,4 @@
+etcdctl --endpoints=https://172.22.1.4:2379,https://172.22.1.5:2379,https://172.22.1.6:2379\
+        --cert-file=/etc/kubernetes/ssl/etcd.pem \
+        --ca-file=/etc/kubernetes/ssl/ca.pem \
+        --key-file=/etc/kubernetes/ssl/etcd-key.pem $1

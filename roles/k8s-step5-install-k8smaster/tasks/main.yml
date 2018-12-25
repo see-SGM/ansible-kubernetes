@@ -1,0 +1,13 @@
+- include: create_admin_certs.yml
+  when: inventory_hostname in groups['local']
+- include: create_kubernetes_certs.yml
+- include: create_kubelet_conf.yml
+- include: scp_config.yml
+- include: start_service.yaml
+- name: kubectl get componentstatuses
+  shell: |
+    :;{{ kubelet_bin_path }}/kubectl get componentstatuses;
+  register: result
+  when: inventory_hostname in groups['Master']
+- name: Show debug info 
+  debug: var=result.stdout_lines verbosity=0

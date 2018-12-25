@@ -1,0 +1,60 @@
+- name: ensure config directory
+  file: 
+    path: "{{ docker_config_dir }}"
+    state: directory
+
+- name: create docker directory
+  file: 
+    path: /etc/docker
+    state: directory
+
+- name: ensure required packages
+  yum:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - yum-utils
+    - epel-release
+    
+- name: add docker ce repo
+  shell: yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+  args:
+    creates: /etc/yum.repos.d/docker-ce.repo
+  register: docker_yum_repo
+  
+- name: make yum cache fast
+  shell: yum makecache fast
+  when: docker_yum_repo.changed
+  
+#- name: install docker selinux
+#  yum:
+#    name: "https://download.docker.com/linux/centos/7/x86_64/stable/Packages/docker-ce-selinux-{{ docker_version }}-1.el7.centos.noarch.rpm"
+#    state: present
+
+- name: install docker ce
+  yum:
+    name: "docker-ce-{{ docker_version }}"
+    state: present
+  notify: restart docker
+  
+- name: copy dockerd daemon.json
+  copy: 
+    src: daemon.json
+    dest: /etc/docker/daemon.json
+
+- name: copy dockerd docker-options.conf
+  copy: 
+    src: docker-options.conf
+    dest: "{{ docker_config_dir }}"
+
+- name: copy dockerd docker-dns.conf
+  copy: 
+    src: docker-dns.conf
+    dest: "{{ docker_config_dir }}"
+
+- name: copy dockerd docker.service
+  #template: 
+  copy:
+    src: docker.service
+    dest: /etc/systemd/system/docker.service
+  notify: restart docker

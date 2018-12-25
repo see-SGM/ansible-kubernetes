@@ -1,0 +1,28 @@
+{% macro initial_cluster() -%}
+{% for host in groups['Etcd'] -%}
+  {{ hostvars[host]['ansible_hostname'] }}=https://{{ hostvars[host]['etcd_machine_address'] }}:{{ etcd_peer_port }}
+  {%- if not loop.last -%},{%- endif -%}
+{%- endfor -%}
+{% endmacro -%}
+
+#see https://github.com/coreos/etcd/blob/master/Documentation/op-guide/configuration.md
+
+ETCD_NAME={{ ansible_hostname }}
+ETCD_DATA_DIR={{ etcd_data_path }}
+
+
+ETCD_INITIAL_CLUSTER={{ initial_cluster() }}
+ETCD_INITIAL_CLUSTER_STATE={{ etcd_initial_cluster_state }}
+ETCD_INITIAL_CLUSTER_TOKEN={{ etcd_initial_cluster_token }}
+ETCD_INITIAL_ADVERTISE_PEER_URLS={{ etcd_initial_advertise_peer_urls }}
+
+ETCD_LISTEN_PEER_URLS={{ etcd_listen_peer_urls }}
+ETCD_ADVERTISE_CLIENT_URLS={{ etcd_advertise_client_urls }}
+ETCD_LISTEN_CLIENT_URLS="{{ etcd_listen_client_urls }}"
+
+ETCD_KEY_FILE={{ etcd_certs_path }}/etcd-key.pem
+ETCD_PEER_CERT_FILE={{ etcd_certs_path }}/etcd.pem
+ETCD_PEER_KEY_FILE={{ etcd_certs_path }}/etcd-key.pem
+ETCD_TRUSTED_CA_FILE={{ etcd_certs_path }}/ca.pem
+ETCD_PEER_TRUSTED_CA_FILE={{ etcd_certs_path }}/ca.pem
+ETCD_CERT_FILE={{ etcd_certs_path }}/etcd.pem

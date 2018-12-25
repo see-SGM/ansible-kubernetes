@@ -1,0 +1,5 @@
+---
+- hosts: Master
+  gather_facts: yes
+  roles:
+  - { role: k8s-step5-install-k8smaster }

@@ -1,0 +1,6 @@
+- include: bin.yml
+  when: inventory_hostname in groups['newNode']
+- include: flannel.yml
+  when: inventory_hostname in groups['newNode']
+- include: Node.yml
+  when: inventory_hostname in groups['newNode']
