@@ -45,7 +45,7 @@ ansible all -m shell -a "blkid /dev/sdc |awk '{print \$2}'| xargs -I {} echo '{}
 ansible all -m shell -a "mkdir /var/lib/docker; mount -a "
 ansible all -m shell -a "df -hT"
 ```
-#####需要下载按照包并放置到一下目录
+#### 需要下载按照包并放置到一下目录
 ```
 ansible/roles/k8s-step3-scp-bin/files/kubernetes-server-linux-amd64.tar.gz
 ansible/roles/k8s-step4-install-etcd/files/etcd-v3.2.17-linux-amd64.tar.gz
